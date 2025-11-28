@@ -4,419 +4,390 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数学動画講座＆確認テスト</title>
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
+    <title>高校数学基本大全 Webテスト</title>
     <style>
+        /* index.htmlと共通のスタイル */
         body {
-            font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", "MS PGothic", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            line-height: 1.7;
+            background-color: #f8f9fa;
+            /* デフォルト背景色 */
+            color: #212529;
             margin: 0;
             padding: 0;
+            transition: background-color 0.3s;
+            /* 背景色変更を滑らかに */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        header {
             text-align: center;
-            background-color: #f4f4f4;
-            color: #333;
-            overflow: hidden;
-            display: flex;
-            flex-direction: row;
-            height: 100vh;
-            width: 100vw;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
         }
 
-        #left-panel {
-            width: 35%;
-            min-width: 150px;
-            height: 100%;
-            overflow-y: auto;
-            padding: 10px;
-            box-sizing: border-box;
+        header h1 {
+            margin: 0;
+            color: #343a40;
+        }
+
+        h2 {
+            /* 科目見出し */
+            border-bottom: 1px solid #ced4da;
+            padding-bottom: 8px;
+            margin-top: 40px;
+            margin-bottom: 5px;
+            /* summaryとの間隔を詰める */
+            color: #495057;
+
+            /* Flexboxでリンクを横並びにする */
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            /* 見出しとリンクを両端に */
             align-items: center;
+            /* 縦位置を中央揃え */
+            flex-wrap: wrap;
+            /* 画面が狭い場合に折り返す */
+            gap: 10px;
+            /* 折り返した際の隙間 */
         }
 
-        #resizer {
-            width: 12px;
-            background: #e0e0e0;
-            cursor: col-resize;
+        /* h2内のリンク用コンテナ */
+        .subject-book-links {
+            display: flex;
+            gap: 8px;
+            /* リンク間の隙間 */
+            white-space: nowrap;
+            /* リンクが改行しないように */
             flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-left: 1px solid #ccc;
-            border-right: 1px solid #ccc;
+            /* リンクが縮まないように */
         }
 
-        #resizer::after {
-            content: "||";
-            color: #999;
-            font-size: 10px;
-            letter-spacing: 1px;
-        }
-
-        #resizer:hover {
-            background: #d0d0d0;
-        }
-
-        #right-panel {
-            flex: 1;
-            height: 100%;
-            position: relative;
-            background-color: #fff;
-            display: flex;
-            flex-direction: column;
-            min-width: 200px;
-        }
-
-        #memo-toolbar {
-            height: 50px;
-            background: #eee;
-            display: flex;
-            align-items: center;
-            padding: 0 10px;
-            border-bottom: 1px solid #ccc;
-            justify-content: flex-end;
-        }
-
-        #memo-pad {
-            flex: 1;
-            width: 100%;
-            touch-action: none;
-            cursor: crosshair;
-        }
-
-        .memo-btn {
-            padding: 8px 16px;
-            background: #fff;
-            border: 1px solid #ccc;
+        /* 小さな購入ボタン */
+        .purchase-link-small {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 0;
+            text-decoration: none;
+            color: #ffffff;
             border-radius: 4px;
-            cursor: pointer;
             font-weight: bold;
+            transition: opacity 0.3s;
+            font-size: 0.7em;
         }
 
-        .memo-btn:hover {
-            background: #f0f0f0;
-        }
-
-        /* --- 動画エリア --- */
-        #video-section {
-            width: 100%;
-            margin-bottom: 15px;
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            display: block;
-            /* 初期状態は表示 */
-        }
-
-        .video-container {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 16 / 9;
-        }
-
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* --- 動画切り替えボタン --- */
-        .toggle-btn-area {
-            margin-bottom: 20px;
-        }
-
-        .skip-btn,
-        .show-video-btn {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.9em;
-            cursor: pointer;
-            border: none;
-            transition: opacity 0.2s;
-        }
-
-        .skip-btn {
-            background: #666;
-            color: #fff;
-        }
-
-        .show-video-btn {
-            background: #fff;
-            color: #007bff;
-            border: 2px solid #007bff;
-            display: none;
-            font-weight: bold;
-        }
-
-        .skip-btn:hover,
-        .show-video-btn:hover {
+        .purchase-link-small:hover {
             opacity: 0.8;
         }
 
-        /* --- テストエリア --- */
-        #quiz-container {
-            background: #fff;
-            padding: 20px 15px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: transform 0.1s;
-        }
-
-        /* 不正解時の揺れアニメーション */
-        .shake {
-            animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
-        }
-
-        @keyframes shake {
-
-            10%,
-            90% {
-                transform: translate3d(-1px, 0, 0);
-            }
-
-            20%,
-            80% {
-                transform: translate3d(2px, 0, 0);
-            }
-
-            30%,
-            50%,
-            70% {
-                transform: translate3d(-4px, 0, 0);
-            }
-
-            40%,
-            60% {
-                transform: translate3d(4px, 0, 0);
-            }
-        }
-
-        h3 {
-            margin-top: 0;
-            color: #444;
-            font-size: 1.1em;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-
-        #question-area {
-            font-size: clamp(0.9rem, 2vw, 1.25rem);
-            margin-bottom: 20px;
-            min-height: 50px;
-            overflow-wrap: break-word;
-            line-height: 1.8;
-            text-align: left;
-            padding: 0 5px;
-            font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", "MS PGothic", sans-serif;
-        }
-
-        /* KaTeXのフォントをゴシックで上書き（数式もゴシック調になります） */
-        #question-area .katex {
-            font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", "MS PGothic", sans-serif;
-        }
-
-        /* 入力表示枠 */
-        .input-container {
-            background: #fdfdfd;
-            border: 2px solid #ccc;
+        /* 書籍紹介エリア */
+        .book-introduction {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            background-color: #fdfdfd;
+            padding: 20px;
             border-radius: 8px;
-            margin-bottom: 15px;
-            padding: 5px 12px;
-            text-align: right;
+            border: 1px solid #e9ecef;
+            margin-bottom: 30px;
         }
 
-        .input-container.active {
-            border-color: #007bff;
+        .book-cover {
+            flex: 1 1 150px;
+            text-align: center;
         }
 
-        /* アクティブ時は青枠 */
+        .book-cover img {
+            max-width: 150px;
+            height: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
-        #raw-input {
+        .book-links {
+            flex: 2 1 300px;
+        }
+
+        .book-links p {
+            margin: 0;
+        }
+
+        /* ボタン色（購入リンク） */
+        .link-amazon {
+            background-color: #e47911;
+        }
+
+        .link-rakuten {
+            background-color: #BF0000;
+        }
+
+        /* テスト一覧（<nav>） */
+        .quiz-list ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .quiz-list li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .quiz-list a {
+            flex-grow: 1;
+            display: inline-block;
+            padding: 15px;
+            background-color: #f1f3f5;
+            text-decoration: none;
+            color: #0056b3;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        .quiz-list a:hover {
+            background-color: #e9ecef;
+        }
+
+        /* ランク表示 */
+        .quiz-rank {
+            display: inline-block;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
             font-size: 0.9em;
-            color: #aaa;
-            height: 1.2em;
-            letter-spacing: 1px;
-            margin-bottom: 2px;
-        }
-
-        #math-preview {
-            font-size: 2em;
-            height: 1.5em;
-            color: #000;
-            overflow-x: auto;
-            overflow-y: hidden;
+            min-width: 60px;
+            text-align: center;
             white-space: nowrap;
         }
 
-        /* --- 結果・解説ボックス --- */
-        #result-box {
-            display: none;
-            text-align: left;
-            padding: 15px;
-            border-radius: 8px;
+        .rank-S {
+            background-color: #ffd700;
+            color: #333;
+        }
+
+        /* Gold */
+        .rank-A {
+            background-color: #c0c0c0;
+            color: #333;
+        }
+
+        /* Silver */
+        .rank-B {
+            background-color: #b87333;
+            color: #fff;
+        }
+
+        /* Copper */
+        .rank-C {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        /* Blue */
+        .rank-yet {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border: 1px dashed #ced4da;
+        }
+
+        /* アコーディオン (科目レベル) */
+        details.subject-accordion {
+            margin-top: 10px;
             margin-bottom: 20px;
-            animation: fadeIn 0.3s ease-in;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background-color: #fdfdfd;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .res-correct {
-            background-color: #f6ffed;
-            border: 1px solid #b7eb8f;
-        }
-
-        .res-correct .res-header {
-            color: #52c41a;
-        }
-
-        .res-wrong {
-            background-color: #fff1f0;
-            border: 1px solid #ffccc7;
-        }
-
-        .res-wrong .res-header {
-            color: #f5222d;
-        }
-
-        .res-header {
+        details.subject-accordion summary {
+            font-size: 1.3em;
             font-weight: bold;
-            font-size: 1.2em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            color: #495057;
+            padding: 15px 20px 15px 35px;
+            cursor: pointer;
+            list-style: none;
+            position: relative;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        details.subject-accordion summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details[open].subject-accordion>summary {
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        details.subject-accordion summary::before {
+            content: '▶';
+            font-size: 0.8em;
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            transition: transform 0.2s;
+        }
+
+        details[open].subject-accordion summary::before {
+            transform: translateY(-50%) rotate(90deg);
+        }
+
+        /* アコーディオン (章レベル - 入れ子) */
+        details.chapter-accordion {
+            margin: 10px 20px 15px 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+        }
+
+        details.chapter-accordion summary {
+            font-size: 1.1em;
+            font-weight: 500;
+            padding: 10px 15px 10px 30px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid transparent;
+        }
+
+        details[open].chapter-accordion>summary {
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        details.chapter-accordion summary::before {
+            left: 10px;
+            font-size: 0.7em;
+        }
+
+        details.chapter-accordion .quiz-list {
+            padding: 15px;
+        }
+
+        details.chapter-accordion .quiz-list li {
             margin-bottom: 8px;
         }
 
-        .res-body {
-            font-size: 0.95em;
-            line-height: 1.6;
-            color: #444;
+        details.chapter-accordion .quiz-list a {
+            padding: 12px 15px;
+            font-weight: 400;
         }
 
-        .res-ans-label {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 10px;
-            display: block;
-            border-top: 1px dashed #ccc;
-            padding-top: 8px;
-        }
-
-        .res-correct-math {
-            font-size: 1.4em;
-            color: #d32f2f;
-            margin-left: 5px;
-        }
-
-        /* 結果ボックス内の「次へ」ボタンエリア */
-        .res-footer {
-            margin-top: 15px;
+        /* 色選択ボタン */
+        .color-selector {
             text-align: right;
-            border-top: 1px dashed #ccc;
-            padding-top: 10px;
+            margin-bottom: 20px;
         }
 
-        .next-btn-in-box {
-            background-color: #333;
+        .color-selector span {
+            margin-right: 5px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .color-selector button {
+            padding: 5px 10px;
+            margin-left: 5px;
+            font-size: 0.8em;
+            cursor: pointer;
+            border: 1px solid #ced4da;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            transition: box-shadow 0.2s, transform 0.05s;
+        }
+
+        .color-selector button:hover {
+            background-color: #e9ecef;
+        }
+
+        /* 小ネタ: 今選択中のボタンを可視化（is-active と aria-pressed の両対応） */
+        .color-selector button.is-active,
+        .color-selector button[aria-pressed="true"] {
+            outline: 2px solid #6c757d;
+            font-weight: 700;
+        }
+
+        .color-selector button:focus-visible {
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, .25);
+        }
+
+        /* 背景色用のクラス */
+        body.bg-light-blue {
+            background-color: #e7f5ff;
+        }
+
+        /* 水色 */
+        body.bg-light-green {
+            background-color: #e6fcf5;
+        }
+
+        /* 薄い緑 */
+        body.bg-beige {
+            background-color: #fcf8e3;
+        }
+
+        /* ベージュ */
+
+        /* リセットボタン */
+        .reset-container {
+            text-align: center;
+            margin-top: 40px;
+            border-top: 1px solid #dee2e6;
+            padding-top: 20px;
+        }
+
+        .reset-button {
+            padding: 10px 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #dc3545;
+            background-color: #fff;
+            border: 1px solid #dc3545;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .reset-button:hover {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        /* API Settings Button & Modal Styles */
+        .api-settings-btn {
+            background: #333;
             color: #fff;
             border: none;
-            padding: 10px 25px;
-            border-radius: 30px;
-            font-size: 1em;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 0.9em;
             font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
+            transition: background 0.3s;
         }
 
-        .next-btn-in-box:hover {
-            background-color: #555;
+        .api-settings-btn:hover {
+            background: #555;
         }
 
-        /* --- キーパッド --- */
-        #keypad {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 4px;
-            width: 100%;
-        }
-
-        .key-btn {
-            padding: 10px 0;
-            font-size: clamp(1rem, 4vw, 1.4em);
-            border: none;
-            border-radius: 8px;
-            background-color: #f0f2f5;
-            box-shadow: 0 4px #ced0d4;
-            color: #333;
-            cursor: pointer;
-            touch-action: manipulation;
-            transition: all 0.1s;
-            min-width: 0;
-            /* Flex/Grid child shrinking fix */
-        }
-
-        .key-btn:active {
-            box-shadow: 0 2px #b0b3b8;
-            transform: translateY(2px);
-        }
-
-        .btn-num {
-            background-color: #fff;
-            font-weight: bold;
-            font-family: sans-serif;
-        }
-
-        .btn-op {
-            background-color: #e4e6eb;
-            font-weight: bold;
-        }
-
-        .btn-blue {
-            background-color: #e7f5ff;
-            color: #007bff;
-            font-family: sans-serif;
-            box-shadow: 0 4px #badbeb;
-        }
-
-        .btn-red {
-            background-color: #ffeef0;
-            color: #d32f2f;
-            font-family: sans-serif;
-            box-shadow: 0 4px #f5c2c7;
-        }
-
-        .grid-span-2 {
-            grid-column: span 2;
-        }
-
-        .grid-span-2 {
-            grid-column: span 2;
-        }
-
-        /* --- AI分析モーダル --- */
+        /* Modal */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -425,618 +396,519 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
             justify-content: center;
             align-items: center;
+            z-index: 1000;
         }
 
         .modal-content {
             background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            width: 80%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
             text-align: left;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            position: relative;
         }
 
-        .close-modal {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 1.5em;
-            cursor: pointer;
-            color: #999;
+        .modal-content h3 {
+            margin-top: 0;
         }
 
-        .ai-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9em;
-            margin-top: 10px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
             font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
-        .ai-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        .api-key-btn {
-            position: fixed;
-            bottom: 10px;
-            left: 10px;
-            font-size: 0.8em;
-            background: #eee;
+        .input-group input {
+            width: 100%;
+            padding: 8px;
             border: 1px solid #ccc;
-            padding: 4px 8px;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .modal-footer {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
             border-radius: 4px;
             cursor: pointer;
-            opacity: 0.7;
+            font-weight: bold;
         }
 
-        .api-key-btn:hover {
-            opacity: 1;
+        .btn-primary {
+            background: #007bff;
+            color: #fff;
         }
 
-        .loading-spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #764ba2;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+        .btn-secondary {
+            background: #ccc;
+            color: #333;
+            margin-right: 10px;
         }
     </style>
 </head>
 
 <body>
+    <div class="container">
+        <header style="position: relative;">
+            <h1>高校数学基本大全 Webテスト</h1>
+            <button onclick="toggleSettingsMenu()"
+                style="position: absolute; right: 0; top: 0; background: none; border: none; font-size: 1.5em; cursor: pointer;"
+                title="共通設定">⚙️</button>
 
-    <div id="left-panel">
-        <div id="video-section">
-            <div class="video-container">
-                <iframe src="https://www.youtube.com/embed/gHjJ_G-N_nU?si=dummy" title="Lecture Video"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen></iframe>
+            <!-- 設定メニュー (プルダウン) -->
+            <div id="settings-menu"
+                style="display: none; position: absolute; right: 0; top: 40px; background: #fff; border: 1px solid #ddd; box-shadow: 0 4px 8px rgba(0,0,0,0.1); padding: 15px; border-radius: 8px; z-index: 100; width: 300px; text-align: left;">
+                <h3
+                    style="margin-top: 0; font-size: 1.1em; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px;">
+                    ⚙️ 共通設定</h3>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; font-weight: bold; font-size: 0.9em;">お名前</label>
+                    <input type="text" id="global-student-name" placeholder="例: 山田 太郎"
+                        style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; font-weight: bold; font-size: 0.9em;">GAS Webアプリ URL</label>
+                    <input type="text" id="global-gas-url" placeholder="https://script.google.com/..."
+                        style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div style="text-align: right;">
+                    <button onclick="saveGlobalSettings()"
+                        style="background: #007bff; color: #fff; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9em;">保存</button>
+                    <button onclick="toggleSettingsMenu()"
+                        style="background: #6c757d; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; margin-left: 5px;">閉じる</button>
+                </div>
             </div>
-        </div>
+        </header>
 
-        <div class="toggle-btn-area">
-            <button id="skip-btn" class="skip-btn" onclick="toggleVideo(false)">▼ 動画を閉じてテストへ</button>
-            <button id="show-btn" class="show-video-btn" onclick="toggleVideo(true)">▲ 動画講義をもう一度見る</button>
-        </div>
-
-        <div id="quiz-container">
-            <h3>確認テスト：第 <span id="q-number">1</span> 問</h3>
-
-            <div id="question-area">読み込み中...</div>
-
-            <div class="input-container" id="input-box">
-                <div id="raw-input">答えを入力</div>
-                <div id="math-preview"></div>
+        <main>
+            <div class="color-selector" role="group" aria-label="背景色の選択">
+                <span>背景色:</span>
+                <button data-color="default">標準</button>
+                <button data-color="light-blue">水色</button>
+                <button data-color="light-green">緑</button>
+                <button data-color="beige">ベージュ</button>
             </div>
 
-            <div id="result-box"></div>
+            <section class="book-introduction">
+                <div class="book-cover">
+                    <img src="https://placehold.co/150x210/eee/666?text=書籍表紙"
+                        onerror="this.src='https://placehold.co/150x210/eee/666?text=画像読込失敗'" alt="高校数学基本大全 表紙">
+                </div>
+                <div class="book-links">
+                    <p>Webテストと連動した動画解説で、数学の「わからない」を解決！<br>書籍本体で体系的に学ぶことができます。</p>
+                </div>
+            </section>
 
-            <div id="keypad">
-                <button class="key-btn btn-num" onclick="inputKey('7')">7</button>
-                <button class="key-btn btn-num" onclick="inputKey('8')">8</button>
-                <button class="key-btn btn-num" onclick="inputKey('9')">9</button>
-                <button class="key-btn btn-red" onclick="deleteLast()">BS</button>
+            <h2>
+                数学I
+                <span class="subject-book-links">
+                    <a href="https://www.amazon.co.jp/dp/XXXXXXXXX1" target="_blank"
+                        class="purchase-link-small link-amazon">基本大全数学IA (Amazon)</a>
+                    <a href="https://books.rakuten.co.jp/rb/XXXXXXXXX1/" target="_blank"
+                        class="purchase-link-small link-rakuten">基本大全数学IA (楽天)</a>
+                </span>
+            </h2>
+            <details class="subject-accordion">
+                <summary>数学I テスト一覧</summary>
+                <details class="chapter-accordion">
+                    <summary>第1章 数と式</summary>
+                    <nav class="quiz-list">
+                        <ul>
+                            <li><a href="M1-1-1-1.html">第1節-1 様々な用語</a><span id="rank-M1-1-1-1"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-1-2.html">第1節-2 整式の加法と減法</a><span id="rank-M1-1-1-2"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-1-3.html">第1節-3 単項式の乗法</a><span id="rank-M1-1-1-3"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-1-4.html">第1節-4 多項式の乗法</a><span id="rank-M1-1-1-4"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-2-1.html">第2節-1 (x+a)(x+b)の展開</a><span id="rank-M1-1-2-1"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-2-2.html">第2節-2 2乗の展開公式</a><span id="rank-M1-1-2-2"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-2-3.html">第2節-3 和と差の積の展開公式</a><span id="rank-M1-1-2-3"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-2-4.html">第2節-4 3項の2乗の展開公式</a><span id="rank-M1-1-2-4"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-3-1.html">第3節-1 共通因数でくくる</a><span id="rank-M1-1-3-1"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-3-2.html">第3節-2 和の平方と差の平方の因数分解</a><span id="rank-M1-1-3-2"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-3-3.html">第3節-3 平方の差の因数分解</a><span id="rank-M1-1-3-3"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-3-4.html">第3節-4 x^2+(a+b)x+ab型の因数分解</a><span id="rank-M1-1-3-4"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-3-5.html">第3節-5 たすき掛けの因数分解</a><span id="rank-M1-1-3-5"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-4-1.html">第4節-1 循環小数</a><span id="rank-M1-1-4-1" class="quiz-rank"></span>
+                            </li>
+                            <li><a href="M1-1-4-2.html">第4節-2 平方根の意味</a><span id="rank-M1-1-4-2"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-4-3.html">第4節-3 根号を含む式の計算</a><span id="rank-M1-1-4-3"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-4-4.html">第4節-4 分母の有理化</a><span id="rank-M1-1-4-4"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-4-5.html">第4節-5 2重根号</a><span id="rank-M1-1-4-5" class="quiz-rank"></span>
+                            </li>
+                            <li><a href="M1-1-4-6.html">第4節-6 整数部分・小数部分</a><span id="rank-M1-1-4-6"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-4-7.html">第4節-7 無理数の相等</a><span id="rank-M1-1-4-7"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-4-8.html">第4節-8 絶対値</a><span id="rank-M1-1-4-8" class="quiz-rank"></span>
+                            </li>
+                            <li><a href="M1-1-4-9.html">第4節-9 絶対値と1次方程式</a><span id="rank-M1-1-4-9"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-4-10.html">第4節-10 平方根と絶対値</a><span id="rank-M1-1-4-10"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-4-11.html">第4節-11 絶対値を含む式のグラフ</a><span id="rank-M1-1-4-11"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-4-12.html">第4節-12 2文字の対称式</a><span id="rank-M1-1-4-12"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-4-13.html">第4節-13 逆数と対称式</a><span id="rank-M1-1-4-13"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-5-1.html">第5節-1 1次方程式</a><span id="rank-M1-1-5-1"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-5-2.html">第5節-2 連立1次方程式</a><span id="rank-M1-1-5-2"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-5-3.html">第5節-3 3文字の連立1次方程式</a><span id="rank-M1-1-5-3"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-5-4.html">第5節-4 1次不等式</a><span id="rank-M1-1-5-4"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-5-5.html">第5節-5 連立1次不等式</a><span id="rank-M1-1-5-5"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-1-5-6.html">第5節-6 絶対値と不等式</a><span id="rank-M1-1-5-6"
+                                    class="quiz-rank"></span></li>
+                        </ul>
+                    </nav>
+                </details>
 
-                <button class="key-btn btn-num" onclick="inputKey('4')">4</button>
-                <button class="key-btn btn-num" onclick="inputKey('5')">5</button>
-                <button class="key-btn btn-num" onclick="inputKey('6')">6</button>
-                <button class="key-btn btn-op" onclick="inputKey('/')">/分</button>
+                <details class="chapter-accordion">
+                    <summary>第2章 集合と命題</summary>
+                    <nav class="quiz-list">
+                        <ul>
+                            <li><a href="M1-2-1-1.html">第1節-1 集合の表し方</a><span id="rank-M1-2-1-1"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-2-1-2.html">第1節-2 ド・モルガンの法則</a><span id="rank-M1-2-1-2"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-2-1-3.html">第1節-3 和集合の要素の個数</a><span id="rank-M1-2-1-3"
+                                    class="quiz-rank"></span></li>
+                            <li><a href="M1-2-3-2.html">第3節-2 必要・十分条件</a><span id="rank-M1-2-3-2"
+                                    class="quiz-rank"></span></li>
+                        </ul>
+                    </nav>
+                </details>
 
-                <button class="key-btn btn-num" onclick="inputKey('1')">1</button>
-                <button class="key-btn btn-num" onclick="inputKey('2')">2</button>
-                <button class="key-btn btn-num" onclick="inputKey('3')">3</button>
-                <button class="key-btn btn-op" onclick="inputKey('√')">√</button>
+                <details class="chapter-accordion">
+                    <summary>第2章 2次関数</summary>
+                    <nav class="quiz-list">
+                        <ul>
+                            <li><a href="#">平方完成（準備中）</a><span id="rank-M1-2-1" class="quiz-rank"></span></li>
+                        </ul>
+                    </nav>
+                </details>
 
-                <button class="key-btn btn-num" onclick="inputKey('0')">0</button>
-                <button class="key-btn btn-op" onclick="inputKey('π')">π</button>
-                <button class="key-btn btn-op" onclick="inputKey('-')">-</button>
-                <button class="key-btn btn-blue" onclick="submitAnswer()">決定</button>
-            </div>
+                <details class="chapter-accordion">
+                    <summary>第3章 図形と計量</summary>
+                    <nav class="quiz-list">
+                        <ul>
+                            <li><a href="#">三角比（準備中）</a><span id="rank-M1-3-1" class="quiz-rank"></span></li>
+                        </ul>
+                    </nav>
+                </details>
+            </details>
+
+            <h2>
+                数学A
+                <span class="subject-book-links">
+                    <a href="https://www.amazon.co.jp/dp/XXXXXXXXX2" target="_blank"
+                        class="purchase-link-small link-amazon">基本大全数学IA (Amazon)</a>
+                    <a href="https://books.rakuten.co.jp/rb/XXXXXXXXX2/" target="_blank"
+                        class="purchase-link-small link-rakuten">基本大全数学IA (楽天)</a>
+                </span>
+            </h2>
+            <details class="subject-accordion">
+                <summary>数学A テスト一覧</summary>
+                <details class="chapter-accordion">
+                    <summary>第1章 場合の数と確率</summary>
+                    <nav class="quiz-list">
+                        <ul>
+                            <li><a href="#">（準備中）</a><span id="rank-MA-1-1" class="quiz-rank"></span></li>
+                        </ul>
+                    </nav>
+                </details>
+            </details>
+        </main>
+
+        <div class="reset-container">
+            <button id="reset-ranks-button" class="reset-button">学習履歴（ランク）をリセット</button>
+            <button class="api-settings-btn" onclick="openApiModal()" style="margin-left: 10px; margin-top: 0;">🔑
+                APIキー設定</button>
         </div>
-    </div> <!-- End left-panel -->
-
-    <div id="resizer"></div>
-
-    <div id="right-panel">
-        <div id="memo-toolbar">
-            <button class="memo-btn" onclick="clearMemo()">🗑️ メモを消去</button>
-        </div>
-        <canvas id="memo-pad"></canvas>
+        <footer>
+            <p>&copy; 2025 [香川亮]</p>
+        </footer>
     </div>
 
-    <!-- AI分析モーダル -->
-    <div id="ai-modal" class="modal-overlay">
+    <!-- API Key Modal -->
+    <div id="api-modal" class="modal-overlay">
         <div class="modal-content">
-            <span class="close-modal" onclick="closeAiModal()">&times;</span>
-            <h3>🤖 AI分析レポート</h3>
-            <div id="ai-content">
-                <!-- ここに結果が表示されます -->
+            <h3>APIキーの設定</h3>
+            <p style="font-size: 0.9em; color: #666;">Google Gemini APIキーを入力してください。<br>キーはブラウザにのみ保存されます。</p>
+            <div class="input-group">
+                <label for="api-key-input">API Key</label>
+                <input type="password" id="api-key-input" placeholder="AIzaSy...">
             </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="testApiKey()">接続テスト</button>
+                <button class="btn btn-secondary" onclick="closeApiModal()">キャンセル</button>
+                <button class="btn btn-primary" onclick="saveApiKey()">保存</button>
+            </div>
+            <div id="test-result" style="margin-top: 15px; font-size: 0.9em; white-space: pre-wrap;"></div>
         </div>
     </div>
-
-    <button class="api-key-btn" onclick="setApiKey()">🔑 API設定</button>
 
     <script>
-        // --- 設定 ---
-        const QUESTIONS_FILE = 'questions.json';
-        const QUESTION_COUNT = 5; // 1回に出題する問題数
+        document.addEventListener("DOMContentLoaded", function () {
 
-        // --- 動画の表示切替 ---
-        function toggleVideo(show) {
-            const videoSection = document.getElementById('video-section');
-            const skipBtn = document.getElementById('skip-btn');
-            const showBtn = document.getElementById('show-btn');
-            if (show) {
-                videoSection.style.display = 'block';
-                skipBtn.style.display = 'inline-block';
-                showBtn.style.display = 'none';
-            } else {
-                videoSection.style.display = 'none';
-                skipBtn.style.display = 'none';
-                showBtn.style.display = 'inline-block';
+            /* --- A. アコーディオン開閉状態の保存／復元 -------------------- */
+            // ページごとに独立して覚える
+            const ACC_STORAGE_KEY = 'accordionState:v1:' + location.pathname;
+
+            function readAccState() {
+                try { return JSON.parse(localStorage.getItem(ACC_STORAGE_KEY) || '{}'); }
+                catch { return {}; }
             }
-        }
-
-        // --- 効果音機能 (Web Audio API) ---
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSound(type) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            if (type === 'correct') { // 正解音: キラキラ系
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(1046.5, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(1567.9, audioCtx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.6);
-            } else { // 不正解音: ブザー系
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.3);
-            }
-        }
-
-        // --- グローバル変数 ---
-        let allQuestions = [];
-        let quizSet = [];
-        let currentIndex = 0;
-        let currentInput = "";
-
-        // --- 初期化 ---
-        document.addEventListener("DOMContentLoaded", () => {
-            loadQuestions();
-        });
-
-        // データ読み込み
-        async function loadQuestions() {
-            try {
-                const response = await fetch(QUESTIONS_FILE);
-                if (!response.ok) throw new Error("JSON読み込み失敗");
-                allQuestions = await response.json();
-                setupQuizSet();
-            } catch (error) {
-                console.warn("外部ファイルの読み込みに失敗しました（ローカル環境の制限など）。サンプルデータを使用します。");
-                // フォールバック用データ
-                allQuestions = [
-                    { question: "\\text{半径}3\\text{cmの円の周の長さ}", correct_answer: "6π", explanation: "円周 = $2\\pi r$ なので、$2 \\times \\pi \\times 3 = 6\\pi$ です。" },
-                    { question: "\\sqrt{3} \\times \\sqrt{12}", correct_answer: "6", explanation: "$\\sqrt{3 \\times 12} = \\sqrt{36} = 6$ です。" },
-                    { question: "1 - \\frac{2}{3}", correct_answer: "1/3", explanation: "$1 = \\frac{3}{3}$ なので、$\\frac{3}{3} - \\frac{2}{3} = \\frac{1}{3}$ です。" }
-                ];
-                setupQuizSet();
-            }
-        }
-
-        function setupQuizSet() {
-            // シャッフルして出題
-            const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
-            quizSet = shuffled.slice(0, QUESTION_COUNT);
-            currentIndex = 0;
-            showQuestion();
-        }
-
-        // --- 表示ロジック ---
-        function showQuestion() {
-            const qData = quizSet[currentIndex];
-            document.getElementById('q-number').innerText = currentIndex + 1;
-
-            // UIリセット
-            const resultBox = document.getElementById('result-box');
-            resultBox.style.display = "none";
-            resultBox.className = "";
-            document.getElementById('keypad').style.pointerEvents = "auto";
-            document.getElementById('keypad').style.opacity = "1";
-            document.getElementById('input-box').classList.add('active');
-            document.getElementById('quiz-container').classList.remove('shake');
-
-            currentInput = "";
-            updateDisplay();
-
-            // 問題文描画
-            katex.render(qData.question, document.getElementById('question-area'), { displayMode: true });
-        }
-
-        // キー入力処理
-        function inputKey(char) {
-            if (currentInput.length > 15) return;
-            currentInput += char;
-            updateDisplay();
-        }
-
-        function deleteLast() {
-            currentInput = currentInput.slice(0, -1);
-            updateDisplay();
-        }
-
-        // 画面更新と数式プレビュー
-        function updateDisplay() {
-            const rawDisplay = document.getElementById('raw-input');
-            const previewDisplay = document.getElementById('math-preview');
-
-            rawDisplay.innerText = currentInput === "" ? "答えを入力" : currentInput;
-            if (currentInput === "") {
-                previewDisplay.innerText = "";
-                return;
-            }
-            let texString = parseInputToTex(currentInput);
-            try {
-                katex.render(texString, previewDisplay, { throwOnError: false });
-            } catch (e) {
-                previewDisplay.innerText = currentInput;
-            }
-        }
-
-        // 入力文字をKaTeX用に変換するヘルパー
-        function parseInputToTex(input) {
-            let tex = input;
-            tex = tex.replace(/π/g, "\\pi");
-            tex = tex.replace(/√(\d+)/g, "\\sqrt{$1}");
-            // 数字、π、ルートの分数を処理する正規表現
-            tex = tex.replace(/([0-9π√]+)\/([0-9π√]+)/g, "\\frac{$1}{$2}");
-            return tex;
-        }
-
-        // --- 判定ロジック ---
-        function submitAnswer() {
-            if (currentInput === "") return;
-
-            const qData = quizSet[currentIndex];
-            const resultBox = document.getElementById('result-box');
-
-            // 操作ロック
-            document.getElementById('keypad').style.pointerEvents = "none";
-            document.getElementById('keypad').style.opacity = "0.5";
-            document.getElementById('input-box').classList.remove('active');
-
-            const isCorrect = (currentInput === qData.correct_answer);
-            let contentHTML = "";
-
-            // 次へボタンのHTML
-            const nextButtonHTML = `
-                <div class="res-footer">
-                    <button class="next-btn-in-box" onclick="nextQuestion()">次の問題へ ❯</button>
-                </div>
-            `;
-
-            if (isCorrect) {
-                // 正解時の演出
-                playSound('correct');
-                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-
-                resultBox.className = "res-correct";
-                contentHTML = `
-                    <div class="res-header">✅ 正解！</div>
-                    <div class="res-body">${qData.explanation}</div>
-                    ${nextButtonHTML}
-                `;
-            } else {
-                // 不正解時の演出
-                playSound('wrong');
-                document.getElementById('quiz-container').classList.add('shake');
-
-                resultBox.className = "res-wrong";
-                contentHTML = `
-                    <div class="res-header">❌ 残念...</div>
-                    <div class="res-body">
-                        ${qData.explanation}
-                        <span class="res-ans-label">正解は：<span class="res-correct-math" id="correct-display"></span></span>
-                        <button class="ai-btn" onclick="analyzeError()">✨ 間違いをAI分析</button>
-                    </div>
-                    ${nextButtonHTML}
-                `;
+            function writeAccState(map) {
+                try { localStorage.setItem(ACC_STORAGE_KEY, JSON.stringify(map)); }
+                catch { }
             }
 
-            resultBox.innerHTML = contentHTML;
+            // subject / chapter を順に採番して安定キーを付与
+            const allDetails = Array.from(
+                document.querySelectorAll('details.subject-accordion, details.chapter-accordion')
+            );
+            const counters = { subject: 0, chapter: 0 };
+            const savedAcc = readAccState();
 
-            // 不正解の場合、正解の数式を描画
-            if (!isCorrect) {
-                let correctTex = parseInputToTex(qData.correct_answer);
-                katex.render(correctTex, document.getElementById('correct-display'));
-            }
+            allDetails.forEach(el => {
+                const role = el.classList.contains('subject-accordion') ? 'subject' : 'chapter';
+                const key = `${role}-${counters[role]++}`;  // 例: subject-0, chapter-0, chapter-1,...
+                el.dataset.accKey = key;
 
-            // 解説文の中の数式 ($...$) をレンダリング
-            renderMathInElement(resultBox, {
-                delimiters: [
-                    { left: "$$", right: "$$", display: true },
-                    { left: "$", right: "$", display: false }
-                ]
-            });
-
-            resultBox.style.display = "block";
-        }
-
-        function nextQuestion() {
-            currentIndex++;
-            if (currentIndex < quizSet.length) {
-                showQuestion();
-            } else {
-                // 全問終了時
-                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
-                playSound('correct');
-                setTimeout(() => {
-                    if (confirm("全問終了！お疲れ様でした。\nもう一度挑戦しますか？")) {
-                        location.reload();
-                    }
-                }, 1000);
-            }
-        }
-
-        // --- メモ帳機能 ---
-        const canvas = document.getElementById('memo-pad');
-        const ctx = canvas.getContext('2d');
-        let isDrawing = false;
-        let lastX = 0;
-        let lastY = 0;
-
-        function resizeCanvas() {
-            const parent = document.getElementById('right-panel');
-            const toolbar = document.getElementById('memo-toolbar');
-            if (parent && toolbar && canvas) {
-                canvas.width = parent.clientWidth;
-                canvas.height = parent.clientHeight - toolbar.clientHeight;
-
-                // 背景を白で塗りつぶす（AI分析用）
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                // 設定リセットされるので再設定
-                ctx.lineJoin = 'round';
-                ctx.lineCap = 'round';
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = '#000';
-            }
-        }
-
-        window.addEventListener('resize', resizeCanvas);
-        // 初期化時に少し遅延させてサイズ合わせ（レイアウト確定後）
-        setTimeout(resizeCanvas, 100);
-
-        function getPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            let clientX, clientY;
-            if (e.changedTouches) {
-                clientX = e.changedTouches[0].clientX;
-                clientY = e.changedTouches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-            return {
-                x: clientX - rect.left,
-                y: clientY - rect.top
-            };
-        }
-
-        function startDrawing(e) {
-            isDrawing = true;
-            const pos = getPos(e);
-            lastX = pos.x;
-            lastY = pos.y;
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-            e.preventDefault(); // スクロール防止
-            const pos = getPos(e);
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(pos.x, pos.y);
-            ctx.stroke();
-            lastX = pos.x;
-            lastY = pos.y;
-        }
-
-        function stopDrawing() {
-            isDrawing = false;
-        }
-
-        // マウスイベント
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseout', stopDrawing);
-
-        // タッチイベント
-        canvas.addEventListener('touchstart', startDrawing, { passive: false });
-        canvas.addEventListener('touchmove', draw, { passive: false });
-        canvas.addEventListener('touchend', stopDrawing);
-
-        function clearMemo() {
-            if (confirm("メモを消去しますか？")) {
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
-        }
-
-        // --- リサイズ機能 ---
-        const resizer = document.getElementById('resizer');
-        const leftPanel = document.getElementById('left-panel');
-        const rightPanel = document.getElementById('right-panel');
-        let isResizing = false;
-
-        resizer.addEventListener('mousedown', (e) => {
-            isResizing = true;
-            document.body.style.cursor = 'col-resize';
-            // iframeのイベント干渉を防ぐ
-            document.querySelectorAll('iframe').forEach(f => f.style.pointerEvents = 'none');
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isResizing) return;
-            const containerWidth = document.body.clientWidth;
-            const newLeftWidth = (e.clientX / containerWidth) * 100;
-
-            // 最小・最大幅の制限 (例えば 20% ~ 80%)
-            if (newLeftWidth > 20 && newLeftWidth < 80) {
-                leftPanel.style.width = `${newLeftWidth}%`;
-                // 右パネルは flex: 1 なので自動調整されるが、
-                // Canvasのリサイズが必要
-                resizeCanvas();
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (isResizing) {
-                isResizing = false;
-                document.body.style.cursor = 'default';
-                document.querySelectorAll('iframe').forEach(f => f.style.pointerEvents = 'auto');
-                resizeCanvas(); // 最終調整
-            }
-        });
-
-        // --- AI分析機能 ---
-        function setApiKey() {
-            const currentKey = localStorage.getItem('gemini_api_key') || "";
-            const newKey = prompt("Gemini APIキーを入力してください:", currentKey);
-            if (newKey !== null) {
-                localStorage.setItem('gemini_api_key', newKey);
-                alert("APIキーを保存しました。");
-            }
-        }
-
-        function closeAiModal() {
-            document.getElementById('ai-modal').style.display = 'none';
-        }
-
-        async function analyzeError() {
-            const apiKey = localStorage.getItem('gemini_api_key');
-            if (!apiKey) {
-                alert("AI分析機能を使うにはAPIキーの設定が必要です。\n左下の「🔑 API設定」からキーを入力してください。");
-                return;
-            }
-
-            const modal = document.getElementById('ai-modal');
-            const content = document.getElementById('ai-content');
-            modal.style.display = 'flex';
-            content.innerHTML = '<div class="loading-spinner"></div><p style="text-align:center">メモを分析中...</p>';
-
-            // 画像データの取得
-            const imageData = canvas.toDataURL("image/png").split(',')[1]; // Base64部分のみ
-            const qData = quizSet[currentIndex];
-
-            const promptText = `
-あなたは数学の家庭教師です。中学生の生徒が問題を解きましたが、間違えてしまいました。
-以下の情報と、添付された手書きメモの画像を元に、生徒がどこで間違えたのか、またはどのような考え違いをしている可能性があるかを分析し、優しくアドバイスしてください。
-正解そのものを教えるだけでなく、次につながるヒントを重視してください。
-数式はLaTeX形式（$または$$で囲む）で記述してください。
-
-問題: ${qData.question}
-正解: ${qData.correct_answer}
-解説: ${qData.explanation}
-`;
-
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [
-                                { text: promptText },
-                                { inline_data: { mime_type: "image/png", data: imageData } }
-                            ]
-                        }]
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    const errorMessage = errorData.error?.message || response.statusText;
-                    throw new Error(`${response.status} ${errorMessage}`);
+                // 復元（保存があれば優先）
+                if (key in savedAcc) {
+                    if (savedAcc[key]) el.setAttribute('open', '');
+                    else el.removeAttribute('open');
                 }
 
-                const data = await response.json();
-                const aiText = data.candidates[0].content.parts[0].text;
-
-                // Markdownを簡易HTML変換 (改行と太字程度)
-                const formattedText = aiText
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\n/g, '<br>');
-
-                content.innerHTML = `<div style="line-height:1.6;">${formattedText}</div>`;
-
-                // KaTeXで数式をレンダリング
-                renderMathInElement(content, {
-                    delimiters: [
-                        { left: "$$", right: "$$", display: true },
-                        { left: "$", right: "$", display: false },
-                        { left: "\\(", right: "\\)", display: false },
-                        { left: "\\[", right: "\\]", display: true }
-                    ]
+                // 開閉のたびに保存
+                el.addEventListener('toggle', () => {
+                    const map = readAccState();
+                    map[key] = el.open;
+                    writeAccState(map);
                 });
+            });
+            /* --- A. ここまで ------------------------------------------------ */
 
-            } catch (error) {
-                console.error(error);
-                content.innerHTML = `<p style="color:red; font-weight:bold;">エラーが発生しました。</p>
-                <p style="font-size:0.9em; color:#d32f2f; background:#fff0f0; padding:10px; border-radius:4px;">
-                    詳細: ${error.message}<br>
-                    <br>
-                    考えられる原因:<br>
-                    ・APIキーが間違っている<br>
-                    ・APIキーに有効な権限がない<br>
-                    ・無料枠の制限を超えている
-                </p>`;
+            /* --- B. ランク表示・リセット処理 -------------------------------- */
+            const quizIds = Array.from(document.querySelectorAll('.quiz-rank[id^="rank-"]'))
+                .map(el => el.id.replace('rank-', ''));
+
+            function loadRanks() {
+                quizIds.forEach(quizId => {
+                    const rankSpan = document.getElementById('rank-' + quizId);
+                    if (!rankSpan) return;
+                    try {
+                        const savedRank = localStorage.getItem('quizRank_' + quizId);
+                        const valid = new Set(['S', 'A', 'B', 'C']);
+                        if (valid.has(savedRank)) {
+                            rankSpan.textContent = `(Rank: ${savedRank})`;
+                            rankSpan.className = 'quiz-rank';
+                            rankSpan.classList.add('rank-' + savedRank);
+                        } else {
+                            rankSpan.textContent = '(未)';
+                            rankSpan.className = 'quiz-rank rank-yet';
+                        }
+                    } catch (e) {
+                        console.error("localStorageからのランク読み込みに失敗しました:", e);
+                        rankSpan.textContent = "(Error)";
+                        rankSpan.style.color = 'red';
+                    }
+                });
+            }
+
+            const resetButton = document.getElementById('reset-ranks-button');
+            if (resetButton) {
+                resetButton.addEventListener('click', () => {
+                    if (confirm("すべての学習履歴（ランク）をリセットします。よろしいですか？")) {
+                        try {
+                            quizIds.forEach(quizId => {
+                                localStorage.removeItem('quizRank_' + quizId);
+                            });
+                            document.querySelectorAll('.quiz-rank').forEach(el => {
+                                el.textContent = '(未)';
+                                el.className = 'quiz-rank rank-yet';
+                            });
+                            loadRanks();
+                            alert("ランク情報をリセットしました。");
+                        } catch (e) {
+                            alert("リセットに失敗しました。");
+                            console.error("localStorageのリセットに失敗しました:", e);
+                        }
+                    }
+                });
+            }
+            loadRanks();
+            /* --- B. ここまで ----------------------------------------------- */
+
+            /* --- C. 背景色の保存・復元 + ボタンのアクティブ表示 ------------ */
+            const body = document.body;
+            const colorButtons = document.querySelectorAll('.color-selector button');
+            const storageKey_Color = 'backgroundColorPreference';
+
+            function syncActiveButton(color) {
+                colorButtons.forEach(b => {
+                    const isActive = b.dataset.color === color;
+                    b.classList.toggle('is-active', isActive);
+                    b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                });
+            }
+
+            function applySavedPreference() {
+                try {
+                    const saved = localStorage.getItem(storageKey_Color) || 'default';
+                    body.classList.remove('bg-light-blue', 'bg-light-green', 'bg-beige');
+                    if (saved !== 'default') body.classList.add('bg-' + saved);
+                    syncActiveButton(saved);
+                } catch (e) {
+                    console.error("localStorageからの背景色読み込みに失敗:", e);
+                }
+            }
+
+            colorButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const selectedColor = button.getAttribute('data-color');
+                    body.classList.remove('bg-light-blue', 'bg-light-green', 'bg-beige');
+                    if (selectedColor !== 'default') {
+                        body.classList.add('bg-' + selectedColor);
+                    }
+                    try {
+                        localStorage.setItem(storageKey_Color, selectedColor);
+                    } catch (e) {
+                        console.error("localStorageへの背景色保存に失敗:", e);
+                    }
+                    syncActiveButton(selectedColor);
+                });
+            });
+
+            applySavedPreference();
+            /* --- C. ここまで ----------------------------------------------- */
+
+            /* --- E. 共通設定の読み込み ------------------------------------- */
+            const savedName = localStorage.getItem('quiz_student_name');
+            const savedGasUrl = localStorage.getItem('quiz_gas_url');
+            if (savedName) document.getElementById('global-student-name').value = savedName;
+            if (savedGasUrl) document.getElementById('global-gas-url').value = savedGasUrl;
+            /* --- E. ここまで ----------------------------------------------- */
+        });
+
+        /* --- E. 共通設定の保存処理 ------------------------------------- */
+        function toggleSettingsMenu() {
+            const menu = document.getElementById('settings-menu');
+            if (menu.style.display === 'none') {
+                menu.style.display = 'block';
+            } else {
+                menu.style.display = 'none';
             }
         }
+
+        function saveGlobalSettings() {
+            const name = document.getElementById('global-student-name').value.trim();
+            const url = document.getElementById('global-gas-url').value.trim();
+
+            if (!name) {
+                alert("お名前を入力してください。");
+                return;
+            }
+
+            localStorage.setItem('quiz_student_name', name);
+            localStorage.setItem('quiz_gas_url', url);
+            alert("設定を保存しました！");
+            toggleSettingsMenu(); // 保存後に閉じる
+        }
+        /* --- E. ここまで ----------------------------------------------- */
+
+        /* --- D. API Key Modal Functions -------------------------------- */
+        function openApiModal() {
+            const currentKey = localStorage.getItem('gemini_api_key') || '';
+            document.getElementById('api-key-input').value = currentKey;
+            document.getElementById('api-modal').style.display = 'flex';
+            document.getElementById('test-result').textContent = '';
+        }
+
+        function closeApiModal() {
+            document.getElementById('api-modal').style.display = 'none';
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('api-key-input').value.trim();
+            if (key) {
+                localStorage.setItem('gemini_api_key', key);
+                alert('APIキーを保存しました。');
+                closeApiModal();
+            } else {
+                alert('APIキーを入力してください。');
+            }
+        }
+
+        async function testApiKey() {
+            const key = document.getElementById('api-key-input').value.trim();
+            const resultEl = document.getElementById('test-result');
+
+            if (!key) {
+                resultEl.textContent = "APIキーを入力してください。";
+                resultEl.style.color = "red";
+                return;
+            }
+
+            resultEl.textContent = "接続テスト中...";
+            resultEl.style.color = "#666";
+
+            try {
+                // モデル一覧を取得してみる
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error?.message || response.statusText);
+                }
+
+                if (data.models) {
+                    const modelNames = data.models.map(m => m.name.replace('models/', '')).join(', ');
+                    resultEl.textContent = `成功！利用可能なモデル:\n${modelNames}`;
+                    resultEl.style.color = "green";
+                } else {
+                    resultEl.textContent = "接続できましたが、モデルが見つかりませんでした。";
+                    resultEl.style.color = "orange";
+                }
+            } catch (error) {
+                resultEl.textContent = `エラー: ${error.message}\n\n考えられる原因:\n・キーが間違っている\n・キーにIP/ドメイン制限がかかっている\n・APIが無効化されている`;
+                resultEl.style.color = "red";
+            }
+        }
+        /* --- D. ここまで ----------------------------------------------- */
     </script>
 </body>
 
-```
+</html>
