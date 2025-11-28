@@ -833,6 +833,10 @@
                 canvas.width = parent.clientWidth;
                 canvas.height = parent.clientHeight - toolbar.clientHeight;
 
+                // 背景を白で塗りつぶす（AI分析用）
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
                 // 設定リセットされるので再設定
                 ctx.lineJoin = 'round';
                 ctx.lineCap = 'round';
@@ -897,7 +901,8 @@
 
         function clearMemo() {
             if (confirm("メモを消去しますか？")) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
         }
 
@@ -971,6 +976,7 @@
 あなたは数学の家庭教師です。中学生の生徒が問題を解きましたが、間違えてしまいました。
 以下の情報と、添付された手書きメモの画像を元に、生徒がどこで間違えたのか、またはどのような考え違いをしている可能性があるかを分析し、優しくアドバイスしてください。
 正解そのものを教えるだけでなく、次につながるヒントを重視してください。
+数式はLaTeX形式（$または$$で囲む）で記述してください。
 
 問題: ${qData.question}
 正解: ${qData.correct_answer}
@@ -978,7 +984,7 @@
 `;
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -991,7 +997,11 @@
                     })
                 });
 
-                if (!response.ok) throw new Error("APIリクエスト失敗");
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMessage = errorData.error?.message || response.statusText;
+                    throw new Error(`${response.status} ${errorMessage}`);
+                }
 
                 const data = await response.json();
                 const aiText = data.candidates[0].content.parts[0].text;
@@ -1003,12 +1013,30 @@
 
                 content.innerHTML = `<div style="line-height:1.6;">${formattedText}</div>`;
 
+                // KaTeXで数式をレンダリング
+                renderMathInElement(content, {
+                    delimiters: [
+                        { left: "$$", right: "$$", display: true },
+                        { left: "$", right: "$", display: false },
+                        { left: "\\(", right: "\\)", display: false },
+                        { left: "\\[", right: "\\]", display: true }
+                    ]
+                });
+
             } catch (error) {
                 console.error(error);
-                content.innerHTML = '<p style="color:red">分析中にエラーが発生しました。APIキーが正しいか確認してください。</p>';
+                content.innerHTML = `<p style="color:red; font-weight:bold;">エラーが発生しました。</p>
+                <p style="font-size:0.9em; color:#d32f2f; background:#fff0f0; padding:10px; border-radius:4px;">
+                    詳細: ${error.message}<br>
+                    <br>
+                    考えられる原因:<br>
+                    ・APIキーが間違っている<br>
+                    ・APIキーに有効な権限がない<br>
+                    ・無料枠の制限を超えている
+                </p>`;
             }
         }
     </script>
 </body>
 
-</html>
+```
