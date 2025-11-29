@@ -982,23 +982,26 @@
             if (window.PointerEvent) {
                 // Pointer Events (モダンブラウザ・タブレット向け)
                 canvas.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
                     if (isPenOnlyMode && e.pointerType === 'touch') {
-                        e.preventDefault();
+                        // e.preventDefault(); // This was already here, but moved to the top
                         return;
                     }
                     canvas.setPointerCapture(e.pointerId);
                     startDrawing(e);
                 });
                 canvas.addEventListener('pointermove', (e) => {
+                    e.preventDefault();
                     if (isPenOnlyMode && e.pointerType === 'touch') {
-                        e.preventDefault();
+                        // e.preventDefault(); // This was already here, but moved to the top
                         return;
                     }
-                    if (e.pointerType === 'touch') e.preventDefault(); // スクロール防止
+                    // if (e.pointerType === 'touch') e.preventDefault(); // This was already here, but moved to the top
                     updateCursor(e);
                     draw(e);
                 });
                 canvas.addEventListener('pointerup', (e) => {
+                    e.preventDefault();
                     canvas.releasePointerCapture(e.pointerId);
                     stopDrawing();
                     updateCursor(e);
@@ -1155,7 +1158,6 @@
             html2canvas(element, {
                 backgroundColor: isDarkMode ? '#121212' : '#ffffff' // 背景色を指定
             }).then(canvas => {
-                const link = document.createElement('a');
                 const now = new Date();
                 const dateStr = now.getFullYear() +
                     ('0' + (now.getMonth() + 1)).slice(-2) +
@@ -1163,18 +1165,49 @@
                     ('0' + now.getHours()).slice(-2) +
                     ('0' + now.getMinutes()).slice(-2) +
                     ('0' + now.getSeconds()).slice(-2);
+                const fileName = `memo_${dateStr}.png`;
 
-                link.download = `memo_${dateStr}.png`;
-                link.href = canvas.toDataURL('image/png');
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                canvas.toBlob(async (blob) => {
+                    if (!blob) return;
 
-                // 元の状態に戻す
-                if (wasHidden) {
-                    overlay.style.display = 'none';
-                }
+                    // Web Share API (navigator.share) を試みる
+                    // ファイル共有がサポートされているか確認
+                    const file = new File([blob], fileName, { type: 'image/png' });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: 'メモを保存',
+                                text: 'メモ画像を保存します'
+                            });
+                            // 共有成功（または共有シートが開いた）
+                        } catch (err) {
+                            if (err.name !== 'AbortError') {
+                                console.error('Share failed:', err);
+                                // エラー時はダウンロードにフォールバック
+                                downloadImage(canvas, fileName);
+                            }
+                        }
+                    } else {
+                        // Web Share API非対応、またはファイル共有非対応の場合はダウンロード
+                        downloadImage(canvas, fileName);
+                    }
+
+                    // 元の状態に戻す
+                    if (wasHidden) {
+                        overlay.style.display = 'none';
+                    }
+                }, 'image/png');
             });
+        }
+
+        function downloadImage(canvas, fileName) {
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = canvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function toggleQuestionOverlay() {
