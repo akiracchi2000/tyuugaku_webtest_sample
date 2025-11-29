@@ -69,6 +69,7 @@
             color: var(--text-color);
             overflow: hidden;
             overscroll-behavior: none;
+            touch-action: none;
             transition: background-color 0.3s, color 0.3s;
         }
 
@@ -82,9 +83,11 @@
             overflow-y: auto;
             background-color: var(--panel-bg);
             transition: background-color 0.3s;
+            overscroll-behavior: none;
         }
 
         #left-panel {
+            touch-action: pan-y;
             border-right: 1px solid var(--border-color);
         }
 
@@ -93,6 +96,8 @@
             position: relative;
             display: flex;
             flex-direction: column;
+            touch-action: none;
+            overscroll-behavior: none;
         }
 
         #memo-toolbar {
@@ -440,7 +445,10 @@
             width: 80%;
             max-width: 600px;
             max-height: 80vh;
+            max-height: 80vh;
             overflow-y: auto;
+            overscroll-behavior: none;
+            touch-action: pan-y;
             text-align: left;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             position: relative;
@@ -583,6 +591,13 @@
                 document.getElementById('dark-mode-toggle').textContent = '☀️';
                 currentPenColor = '#fff'; // ペンの色を白に設定
             }
+
+            // 全体スクロール防止（左パネルとモーダル以外）
+            document.addEventListener('touchmove', function (e) {
+                if (!e.target.closest('#left-panel') && !e.target.closest('.modal-content')) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
         });
 
         // --- クイズ初期化 ---
