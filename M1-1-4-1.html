@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数と式：様々な用語のテスト (ランダム10題)</title>
+    <title>数と式：循環小数 (ランダム10題)</title>
 
     <!-- KaTeX（数式表示ライブラリ） -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
@@ -14,7 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <!-- クイズデータ読み込み -->
-    <script src="M1-1-1-1QD.js"></script>
+    <script src="M1-1-4-1QD.js"></script>
 
     <style>
         /* 共通スタイル */
@@ -719,13 +719,13 @@
                 const newUrl = window.location.pathname + window.location.hash;
                 window.history.replaceState(null, '', newUrl);
             } else if (isResumeOn) {
-                const savedData = localStorage.getItem('quiz_progress_m1_1_1_1');
+                const savedData = localStorage.getItem('quiz_progress_m1_1_4_1');
                 if (savedData) {
                     if (confirm("前回の続きから始めますか？")) {
                         restoreProgress(JSON.parse(savedData));
                         return;
                     } else {
-                        localStorage.removeItem('quiz_progress_m1_1_1_1'); // キャンセルしたら削除
+                        localStorage.removeItem('quiz_progress_m1_1_4_1'); // キャンセルしたら削除
                     }
                 }
             }
@@ -1487,7 +1487,7 @@
                 startTime: startTime,
                 timestamp: Date.now()
             };
-            localStorage.setItem('quiz_progress_m1_1_1_1', JSON.stringify(data));
+            localStorage.setItem('quiz_progress_m1_1_4_1', JSON.stringify(data));
         }
 
         function restoreProgress(data) {
@@ -1502,7 +1502,7 @@
         }
 
         function clearProgress() {
-            localStorage.removeItem('quiz_progress_m1_1_1_1');
+            localStorage.removeItem('quiz_progress_m1_1_4_1');
         }
 
         // --- フルスクリーン機能 ---

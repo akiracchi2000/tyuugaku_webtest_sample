@@ -533,8 +533,6 @@
                     style="padding: 5px 10px; font-size: 1.2em;" title="フルスクリーン／フルスクリーン解除">⛶</button> -->
                 <button id="dark-mode-toggle" class="tool-btn" onclick="toggleDarkMode()"
                     style="padding: 5px 10px; font-size: 1.2em;" title="ダークモード／ライトモード">🌙</button>
-                <button id="resume-toggle" class="tool-btn" onclick="toggleResume()"
-                    style="padding: 5px 10px; font-size: 1.2em; display: none;" title="途中保存機能のON/OFF">📂</button>
                 <button id="sound-toggle" class="tool-btn" onclick="toggleSound()"
                     style="padding: 5px 10px; font-size: 1.2em;" title="効果音の有／無">🔊</button>
             </div>
@@ -550,14 +548,9 @@
                 </div>
                 <h2 id="question-text"></h2>
 
-                <button id="answer-btn" class="tool-btn"
-                    style="display:block; margin: 20px auto; padding: 12px 30px; font-size: 1.2em; background-color: #28a745; color: white;"
-                    onclick="checkAnswerWithAI()">回答する</button>
-                <div id="analyzing-indicator" style="display:none; text-align:center; margin: 10px 0;">
-                    <span style="font-size: 2em;">🤖</span> 採点中...
-                </div>
+                <button id="show-options-btn">選択肢を表示する</button>
 
-                <div id="options-container" style="display:none;"></div>
+                <div id="options-container"></div>
 
                 <div id="feedback"></div>
 
@@ -605,7 +598,7 @@
         <div id="memo-toolbar">
             <button class="tool-btn active" id="btn-pen" onclick="setTool('pen')">✏️ ペン</button>
             <button class="tool-btn" id="btn-eraser" onclick="setTool('eraser')">🧽 消しゴム</button>
-            <button class="tool-btn active" id="btn-pen-only" onclick="togglePenOnly()">🖊️ ペンのみ</button>
+            <button class="tool-btn active" id="btn-pen-only" onclick="togglePenOnly()">�️ ペンのみ</button>
             <button class="tool-btn" onclick="undoMemo()">↩️ 元に戻す</button>
             <span style="margin: 0 10px; color: #ccc;">|</span>
             <button class="tool-btn" id="btn-toggle-question" onclick="toggleQuestionOverlay()">📖 問題を表示</button>
@@ -634,7 +627,6 @@
         let startTime; // 開始時間
         let isSoundOn = true; // 効果音ON/OFF
         let isDarkMode = false; // ダークモードON/OFF
-        let isResumeOn = false; // レジューム機能ON/OFF (デフォルトOFF)
         let currentPenColor = '#000'; // 現在のペンの色
         const synth = window.speechSynthesis;
         let currentUtterance = null;
@@ -659,13 +651,6 @@
                 document.getElementById('dark-mode-toggle').textContent = '☀️';
                 currentPenColor = '#fff'; // ペンの色を白に設定
             }
-
-            // レジューム設定を読み込む (一時的に無効化)
-            // const savedResume = localStorage.getItem('resumeOn');
-            // if (savedResume !== null) {
-            //     isResumeOn = (savedResume === 'true');
-            // }
-            updateResumeButton();
 
             // 全体スクロール防止（左パネルとモーダル以外）
             document.addEventListener('touchmove', function (e) {
@@ -710,23 +695,13 @@
             }
 
             // レジューム機能：保存されたデータがあるか確認
-            const urlParams = new URLSearchParams(window.location.search);
-            const isReset = urlParams.get('reset') === 'true';
-
-            if (isReset) {
-                // index.htmlから来た場合などはリセット（確認なしで最初から）
-                // URLからパラメータを削除して、リロード時はレジュームが効くようにする
-                const newUrl = window.location.pathname + window.location.hash;
-                window.history.replaceState(null, '', newUrl);
-            } else if (isResumeOn) {
-                const savedData = localStorage.getItem('quiz_progress_m1_1_1_1');
-                if (savedData) {
-                    if (confirm("前回の続きから始めますか？")) {
-                        restoreProgress(JSON.parse(savedData));
-                        return;
-                    } else {
-                        localStorage.removeItem('quiz_progress_m1_1_1_1'); // キャンセルしたら削除
-                    }
+            const savedData = localStorage.getItem('quiz_progress_m1_1_1_1');
+            if (savedData) {
+                if (confirm("前回の続きから始めますか？")) {
+                    restoreProgress(JSON.parse(savedData));
+                    return;
+                } else {
+                    localStorage.removeItem('quiz_progress_m1_1_1_1'); // キャンセルしたら削除
                 }
             }
 
@@ -758,8 +733,9 @@
             feedbackEl.style.display = 'none';
             nextBtn.style.display = 'none';
             resultsBtn.style.display = 'none';
-            document.getElementById('answer-btn').style.display = 'block';
-            document.getElementById('analyzing-indicator').style.display = 'none';
+            optionsContainer.style.display = 'none';
+            showOptionsBtn.style.display = 'block';
+            optionsContainer.innerHTML = '';
 
             // メモは消さない（ユーザーが前の計算を残したいかもしれないので）
             clearMemo();
@@ -778,122 +754,43 @@
             // メモパッド上の問題文更新
             document.getElementById('memo-question-overlay').innerHTML = `<strong>問題 ${currentQuestionIndex + 1}:</strong><br>${currentQuestion.question}`;
 
+            // 選択肢作成
+            const shuffledOptions = [...currentQuestion.options].sort(() => 0.5 - Math.random());
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.innerHTML = option;
+                button.classList.add('option-btn');
+                button.dataset.optionValue = option;
+                button.addEventListener('click', (e) => selectAnswer(option, e.currentTarget));
+                optionsContainer.appendChild(button);
+            });
+
+            if (currentQuestion.layout === 'vertical') {
+                optionsContainer.classList.add('options-vertical');
+            } else {
+                optionsContainer.classList.remove('options-vertical');
+            }
+
             renderAllMath();
+
+            // イベントリスナー再設定（重複防止のため、HTML側でonclick設定か、ここで毎回設定するか。
+            // ここでは要素が静的なので、DOMContentLoadedで設定すべきだが、showOptionsBtnは静的なのでOK）
         }
 
-        async function checkAnswerWithAI() {
-            const answerBtn = document.getElementById('answer-btn');
-            const indicator = document.getElementById('analyzing-indicator');
-            const feedbackEl = document.getElementById('feedback');
-            const nextBtn = document.getElementById('next-btn');
-            const resultsBtn = document.getElementById('results-btn');
-
-            answerBtn.style.display = 'none';
-            indicator.style.display = 'block';
-
-            const apiKey = localStorage.getItem('gemini_api_key');
-            if (!apiKey) {
-                alert("APIキーが設定されていません。トップページで設定してください。");
-                indicator.style.display = 'none';
-                answerBtn.style.display = 'block';
-                return;
-            }
-
+        document.getElementById('show-options-btn').addEventListener('click', function () {
             const currentQuestion = quizData[currentQuestionIndex];
+            const optionsContainer = document.getElementById('options-container');
 
-            try {
-                // html2canvasでメモコンテナを画像化
-                const memoContainer = document.getElementById('memo-container');
-                const capturedCanvas = await html2canvas(memoContainer, {
-                    backgroundColor: isDarkMode ? '#121212' : '#ffffff',
-                    scale: 1
-                });
-                const imageData = capturedCanvas.toDataURL('image/png').split(',')[1];
-
-                const prompt = `
-あなたは数学の先生です。
-以下の問題に対する生徒の手書き解答（画像）を採点してください。
-
-問題: ${currentQuestion.question}
-正解: ${currentQuestion.answer}
-
-**重要な採点ルール:**
-1. **画像に何も書かれていない、または白紙に近い場合は、必ず「不正解」としてください。**
-2. 解答が正解と一致している場合のみ「正解」としてください。有理化で同じ回答の場合も正解，積の順序が異なる解答も正解とします。
-3. 途中式があっても、最終的な答えが間違っていれば「不正解」です。
-4. **数式は必ずLaTeX形式（$ または  で囲む）で記述してください。特に分数は \frac{分子}{分母} の形式を使用してください。**
-
-以下のJSON形式のみを出力してください。Markdownのコードブロックは不要です。
-{
-  "isCorrect": true または false,
-  "recognizedAnswer": "画像から読み取った生徒の解答（数式や答え）。数式は必ずLaTeX形式（$で囲む）で記述してください。例: $x^2+3x$",
-  "feedback": "正解/不正解の判定理由と、生徒への簡潔なアドバイス（100文字以内）。数式は必ずLaTeX形式（$で囲む）で記述してください。"
-}
-`;
-
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [
-                                { text: prompt },
-                                {
-                                    inline_data: {
-                                        mime_type: "image/png",
-                                        data: imageData
-                                    }
-                                }
-                            ]
-                        }]
-                    })
-                });
-
-                if (!response.ok) throw new Error("API Error");
-
-                const data = await response.json();
-                const aiText = data.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
-                const result = JSON.parse(aiText);
-
-                indicator.style.display = 'none';
-
-                if (result.isCorrect) {
-                    score++;
-                    playSound('correct');
-                    feedbackEl.className = 'correct-feedback';
-                    feedbackEl.innerHTML = `🤖AIカガワ先生🤖の解答check✅<br><span style="color: var(--correct-color);"><strong>正解！💐</strong></span><br>あなたの解答: ${result.recognizedAnswer}<br><br>${result.feedback}<br>`;
-                } else {
-                    playSound('incorrect');
-                    feedbackEl.className = 'incorrect-feedback';
-                    feedbackEl.innerHTML = `🤖AIカガワ先生🤖の解答check✅<br><span style="color: var(--incorrect-color);"><strong>不正解💦</strong></span><br>あなたの解答: ${result.recognizedAnswer}<br><br>${result.feedback}<br>（正解: ${currentQuestion.answer}）<br>`;
-
-                    // 不正解リストに追加
-                    if (!incorrectQuestions.includes(currentQuestion)) {
-                        incorrectQuestions.push(currentQuestion);
-                    }
-                }
-
-                saveProgress();
-                updateProgressAndScore();
-
-                // 解説追加
-                feedbackEl.innerHTML += `<hr>${currentQuestion.rationale || ""}`;
-                feedbackEl.style.display = 'block';
-                renderAllMath();
-
-                if (currentQuestionIndex < quizData.length - 1) {
-                    nextBtn.style.display = 'block';
-                } else {
-                    resultsBtn.style.display = 'block';
-                }
-
-            } catch (error) {
-                console.error(error);
-                alert("採点中にエラーが発生しました。もう一度試してください。");
-                indicator.style.display = 'none';
-                answerBtn.style.display = 'block';
+            if (currentQuestion.layout === 'vertical') {
+                optionsContainer.style.display = 'grid';
+                optionsContainer.style.gridTemplateColumns = '1fr';
+            } else {
+                optionsContainer.style.display = 'grid';
+                optionsContainer.style.gridTemplateColumns = '1fr 1fr';
             }
-        }
+            this.style.display = 'none';
+            renderAllMath();
+        });
 
         function selectAnswer(selectedAnswer, btnElement) {
             const currentQuestion = quizData[currentQuestionIndex];
@@ -1193,22 +1090,8 @@
 
         function resizeCanvas() {
             const container = document.getElementById('memo-container');
-            // 現在の描画内容を一時保存
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = canvas.width;
-            tempCanvas.height = canvas.height;
-            const tempCtx = tempCanvas.getContext('2d');
-            if (canvas.width > 0 && canvas.height > 0) {
-                tempCtx.drawImage(canvas, 0, 0);
-            }
-
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
-
-            // 描画内容を復元
-            if (tempCanvas.width > 0 && tempCanvas.height > 0) {
-                ctx.drawImage(tempCanvas, 0, 0);
-            }
         }
 
         function startDrawing(e) {
@@ -1453,32 +1336,7 @@
         }
 
         // --- レジューム機能 ---
-        function toggleResume() {
-            isResumeOn = !isResumeOn;
-            localStorage.setItem('resumeOn', isResumeOn);
-            updateResumeButton();
-
-            if (!isResumeOn) {
-                clearProgress(); // OFFにしたら保存データも消す（オプション）
-            } else {
-                saveProgress(); // ONにしたら即保存
-            }
-        }
-
-        function updateResumeButton() {
-            const btn = document.getElementById('resume-toggle');
-            if (isResumeOn) {
-                btn.textContent = '📂';
-                btn.style.opacity = '1';
-            } else {
-                btn.textContent = '📁'; // 閉じたフォルダなど
-                btn.style.opacity = '0.5';
-            }
-        }
-
         function saveProgress() {
-            if (!isResumeOn) return;
-
             const data = {
                 quizData: quizData,
                 currentQuestionIndex: currentQuestionIndex,
@@ -1567,7 +1425,7 @@ AIカガワ先生の目的は間違いの原因を指摘することです。**�
 全体は「間違いの指摘」「間違いを防ぐには」「復習のポイント」の3つを中心に構成してください。全体で200字程度がいいです。+
 分析は生徒のやる気をそぐことのないように，丁寧に言葉使いに気を付けて行ってください。+
 分析の出だしは「はい」という表現は使わず，「お待たせしました！」的な表現にしてください。適宜表現は変えてください。
-**数式は必ずLaTeX形式（$ または  で囲む）で記述してください。特に分数は \frac{分子}{分母} の形式を使用してください。**
+
 `;
 
                 // ユーザーの環境で利用可能な gemini-2.0-flash を使用 (v1beta)
@@ -1734,3 +1592,4 @@ AIカガワ先生の目的は間違いの原因を指摘することです。**�
 </body>
 
 </html>
+

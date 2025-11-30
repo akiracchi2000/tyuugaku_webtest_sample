@@ -173,6 +173,7 @@ window.QUIZ_DATA = [
             {
                 question: "多項式 $x^2 + ax + a^2 - 1$ の $x$ についての定数項を答えよ。",
                 options: [ "$a^2-1$", "$-1$", "$a^2$", "$a$" ],
+                answer: "$a^2-1$",
                 rationale: "<strong>定義: </strong>特定の文字に着目した場合、その文字を含まない項をすべて定数項といいます。<br><strong>解説: </strong>$x$ に着目した場合、$x$ を含まない項は $a^2$ と $-1$ です。よって、定数項は $a^2-1$ です。<button class='speak-button' onclick='speakRationale(this)'>🔊</button><br> <strong>↓「学びエイド」の解説動画で確認</strong> <br><a href='https://www.manabi-aid.jp/lesson/id/7707/63099' target='_blank'>" + "解説動画を見る" + "</a><br>" + "<small>（※学びエイドのログインが必要です）</small>"
             },
             // 問題 26
